@@ -3,11 +3,12 @@ package migrations
 import "database/sql";
 
 func CreateInventoryTable(db *sql.DB) error  {
-	query := `CREATE TABLE inventories (
+	query := `CREATE TABLE IF NOT EXISTS inventories (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     location VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_inventory_name (name)
 );
 `
 	_, err := db.Exec(query)
@@ -16,7 +17,7 @@ func CreateInventoryTable(db *sql.DB) error  {
 
 func CreateProductTable(db *sql.DB) error {
 	productQuery := `
-	CREATE TABLE products (
+	CREATE TABLE IF NOT EXISTS products (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(150) NOT NULL,
     description TEXT,
@@ -29,7 +30,7 @@ func CreateProductTable(db *sql.DB) error {
 
 func CreateProductVariantTable(db *sql.DB) error {
 	variantQuery := `
-	CREATE TABLE product_variants (
+	CREATE TABLE IF NOT EXISTS product_variants (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     product_id BIGINT NOT NULL,
     flavour VARCHAR(50) NOT NULL,
@@ -45,7 +46,7 @@ func CreateProductVariantTable(db *sql.DB) error {
 
 func CreateInventoryStockTable(db *sql.DB) error {
 	stockQuery := `
-	CREATE TABLE inventory_stock (
+	CREATE TABLE IF NOT EXISTS inventory_stock (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     inventory_id BIGINT NOT NULL,
     product_variant_id BIGINT NOT NULL,
