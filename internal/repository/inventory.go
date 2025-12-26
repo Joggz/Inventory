@@ -46,7 +46,7 @@ func (r *InventoryRepository)Inventory()([]migrations.Inventory, error) {
 }
 
 func (r *InventoryRepository)GetInventoryByID(id int64)(*migrations.Inventory, error) {
-	row := r.db.QueryRow("SELECT * FROM inventory WHERE id = ?", id);
+	row := r.db.QueryRow("SELECT * FROM inventories WHERE id = ?", id);
 	var i migrations.Inventory;
 	if err := row.Scan(&i.ID, &i.Name, &i.Location, &i.CreatedAt); err != nil {
 		return nil, err;

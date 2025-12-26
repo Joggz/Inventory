@@ -50,3 +50,22 @@ type InventoryService struct{
 		"inventories": invs,
 	})
  }
+
+ func (h *InventoryService) GetInventoryByID(c *fiber.Ctx) error  {
+	id, err := c.ParamsInt("id");
+	if err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	inv, err := h.svc.GetInventoryByID(int64(id));
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status": http.StatusOK,
+		"inventory": inv,
+	})
+ }

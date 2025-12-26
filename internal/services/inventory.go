@@ -34,3 +34,12 @@ func (s *InventoryService) GetAllInventory() ([]migrations.Inventory, error) {
 	}
 	return invs, nil
 }
+
+func (s *InventoryService) GetInventoryByID(id int64) (*migrations.Inventory, error)  {
+	inv, err := s.repo.GetInventoryByID(id);
+
+	if err != nil {
+		return nil, err
+	}	
+	return inv, nil
+}
