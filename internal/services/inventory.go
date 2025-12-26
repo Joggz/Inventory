@@ -25,3 +25,12 @@ func(s *InventoryService) Create(inventory []migrations.Inventory) error {
 	}
 	return nil
 }
+
+
+func (s *InventoryService) GetAllInventory() ([]migrations.Inventory, error) {
+	invs, err := s.repo.Inventory()
+	if err != nil {
+		return nil, err
+	}
+	return invs, nil
+}

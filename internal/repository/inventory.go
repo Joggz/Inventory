@@ -27,7 +27,7 @@ type InventoryService struct {
 
 
 func (r *InventoryRepository)Inventory()([]migrations.Inventory, error) {
-	rows, err := r.db.Query("SELECT * FROM inventory")
+	rows, err := r.db.Query("SELECT * FROM inventories")
 	if err != nil {
 		return nil, err
 	}

@@ -36,3 +36,17 @@ type InventoryService struct{
 		"message": "inventory Created",
 	})
  }
+
+
+ func (h *InventoryService) GetAllInventory(c *fiber.Ctx) error {
+	invs, err := h.svc.GetAllInventory()
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"status": http.StatusOK,
+		"inventories": invs,
+	})
+ }
