@@ -34,3 +34,25 @@ type InventoryStock struct {
 	Quantity         int
 	UpdatedAt        time.Time
 }
+
+
+type CreateProduct struct {
+	Name        string
+	Description string
+}
+
+type CreateProductVariant struct {
+	ProductID int64
+	Flavour   string
+	SKU       string
+	Name string
+}
+
+
+type CreateVariantInput struct {
+	ProductID int64
+	Name      string
+	SKU       string
+}
+
+
