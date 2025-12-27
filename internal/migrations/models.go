@@ -56,3 +56,19 @@ type CreateVariantInput struct {
 }
 
 
+type AddStockItem struct  {
+	ProductVariantID int64
+	Quantity int
+}
+
+type AddInventoryStock  struct {
+	InventoryID int64
+	Items [] AddStockItem
+}
+
+type AddMultipleStockPayload struct {
+	Items []struct {
+		VariantID int64 `json:"variant_id"`
+		Quantity  int   `json:"quantity"`
+	} `json:"items"`
+}
