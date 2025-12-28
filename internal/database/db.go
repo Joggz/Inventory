@@ -38,28 +38,32 @@ func ConnectDB() (*sql.DB, error) {
 
 	if err := db.Ping(); err != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("Error connecting to database: %w", err)
+		return nil, fmt.Errorf("error connecting to database: %w", err)
 	}
 
 	if err := migrations.CreateInventoryTable(db); err != nil {
 		_ = db.Close()
-		return nil, fmt.Errorf("Error creating inventory table: %w", err)
+		return nil, fmt.Errorf("error creating inventory table: %w", err)
 	}
 
 	if err := migrations.CreateProductTable(db); err != nil {
 		_ = db.Close();
-		return nil, fmt.Errorf("Error creating product table: %w", err)
+		return nil, fmt.Errorf("error creating product table: %w", err)
 	}
 
 	if err := migrations.CreateProductVariantTable(db); err != nil {
 		_ = db.Close();
-		return nil, fmt.Errorf("Error creating product variant table: %w", err)
+		return nil, fmt.Errorf("error creating product variant table: %w", err)
 	}
 	if err := migrations.CreateInventoryStockTable(db); err != nil {
 		_ = db.Close();
-		return nil, fmt.Errorf("Error creating inventory stock table: %w", err)
+		return nil, fmt.Errorf("error creating inventory stock table: %w", err)
 	}
 	
+	if err := migrations.AddPriceToInventoryStock(db); err != nil {
+		_ = db.Close();
+		return nil, fmt.Errorf("error adding price to inventory stock table: %w", err)
+	}
 	fmt.Println("✅ MySQL connected successfully")
 	return db, nil
 }
