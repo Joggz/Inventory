@@ -90,3 +90,27 @@ func (h *InventoryStockHandler) GetStocks(c *fiber.Ctx)error{
 		})
 
  }
+
+ func (h *InventoryStockHandler) GetProductVariantByInventoryID(c *fiber.Ctx) error {
+		inventoryID, err := strconv.ParseInt(c.Params("id"),10, 64,)
+		if err != nil {
+			return  err
+		}
+		productVariant, err := strconv.ParseInt(c.Params("variant"),10, 64,)
+		if err != nil {
+			return  err
+		}
+
+	stock, err := h.ish.GetProductVariantByInventoryID(inventoryID, productVariant)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message":  err.Error(),
+			})
+		}
+
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"stock": stock,
+			"status" : http.StatusOK,
+		})
+
+ }
