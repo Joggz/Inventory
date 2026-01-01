@@ -36,3 +36,16 @@ func (oh *OrderHandler) CreateOrder(c *fiber.Ctx) error {
 	}
 	return c.Status(http.StatusCreated).JSON(fiber.Map{"order_id": orderID})
 }
+
+func (oh *OrderHandler) ConfirmPayment(c *fiber.Ctx) error {
+	ref := c.Params("ref")
+
+	payment, err := oh.orderService.ConfirmPayment(ref)
+	if err != nil {
+			return c.Status(http.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+
+	}
+
+	return c.Status(http.StatusCreated).JSON(fiber.Map{"order": payment})
+
+}

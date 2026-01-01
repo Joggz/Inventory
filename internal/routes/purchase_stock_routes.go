@@ -8,4 +8,5 @@ import (
 func  PurchaseStockRoutes(app *fiber.App, orderHandler *handlers.OrderHandler)  {
 	purchase := app.Group("/buy")
 	purchase.Post("/product", orderHandler.CreateOrder)
+	purchase.Get("/confirm/:ref", orderHandler.ConfirmPayment)
 }

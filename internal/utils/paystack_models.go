@@ -10,3 +10,10 @@ type PaystackInitializeResponse struct {
         Reference        string `json:"reference"`
     } `json:"data"`
 }
+
+
+type PaymentConfirmation struct {
+        Data struct {
+            Status bool `json:"status"`
+        }
+    }

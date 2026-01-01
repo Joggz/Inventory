@@ -78,3 +78,47 @@ func (por *PurchaseOrderRepository) CreatePurchaseOrder(inventoryID, variantID, 
 	return resp, nil
 
 }
+
+
+func (por *PurchaseOrderRepository) ConfirmPayment(ref string) ( *utils.PaymentConfirmation, error  ){
+	res, err := utils.VerifyPaystack(ref);
+	fmt.Printf("res: %v\n", res)
+	if err != nil {
+		return  nil, err
+	}
+
+	if !res.Data.Status {
+		por.OrderRep.UpdateStatus(ref, "failed")
+        return nil, errors.New("payment failed")
+	}
+
+	tx, err := por.db.Begin();
+	if err != nil {
+		return nil, err
+	}
+
+	defer tx.Rollback();
+
+	var or struct {
+		InventoryID int64
+        VariantID   int64
+        Quantity    int64
+        Email       string
+	}
+	err = tx.QueryRow(`
+        SELECT inventory_id, product_variant_id, quantity, email
+        FROM orders WHERE reference = ?
+    `, ref).Scan(&or.InventoryID, &or.VariantID, &or.Quantity, &or.Email)
+
+    if err != nil {
+        return nil, err
+    }
+	 err = por.invRepo.DeductStockUponSuccessfulPurchase(tx, or.InventoryID, or.VariantID, or.Quantity)
+    if err != nil {
+        return nil, err
+    }
+
+    por.OrderRep.UpdateStatus(ref, "success")
+    tx.Commit()
+    return res, nil
+}

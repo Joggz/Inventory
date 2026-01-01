@@ -61,3 +61,51 @@ func InitializePayment(email string, amount int64) (*PaystackInitializeResponse,
 	}
 	return &paystackResponse, nil
 }
+
+
+func VerifyPaystack(ref string) (*PaymentConfirmation, error) {
+
+	err := godotenv.Load()
+    if err != nil {
+        fmt.Println("⚠️  No .env file found, using system env")
+		return nil, err
+    }
+    var res struct {
+        Data struct {
+            Status string
+        }
+    }
+
+	jsonPayload, err := json.Marshal(res)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", "https://api.paystack.co/transaction/verify/", bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+os.Getenv("PAYSTACK_SECRET"));
+	req.Header.Set("Content-Type", "application/json");
+
+	client := &http.Client{Timeout: 15 * time.Second}
+
+	response, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+		defer response.Body.Close()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result PaymentConfirmation
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
