@@ -50,9 +50,16 @@ func New() *App {
 	invsvc := services.NewInventoryStockService(invns);
 	invstockHandler := handlers.NewInventoryStockHandler(invsvc)
 
+
+	orderRepo := repository.NewOrderRepository(db)
+	purchaseOrderRepo := repository.NewPurchaseOrderRepository(db, invns, orderRepo)
+	orderHandler := handlers.NewOrderHandler(purchaseOrderRepo)
+	
+
 	routes.InventoryRoutes(fb, h)
 	routes.ProductRoutes(fb, productHandler)
 	routes.InventoryStockRoutes(fb, invstockHandler)
+	routes.PurchaseStockRoutes(fb, orderHandler)
 
 
 	return &App{fb: fb, db: db }

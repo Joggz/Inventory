@@ -35,6 +35,7 @@ func (h *InventoryStockHandler) AddMultiInventoryStock(c *fiber.Ctx) error {
 		items = append(items, migrations.AddStockItem{
 			ProductVariantID: item.VariantID,
 			Quantity:  item.Quantity,
+			Price:     item.Price,
 		})
 	}
 
@@ -47,6 +48,69 @@ func (h *InventoryStockHandler) AddMultiInventoryStock(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(fiber.Map{
 		"status" :  http.StatusCreated,
 		"message": "Stock added successfully",
+		// "items": items,
 	})
 
 }
+
+
+func (h *InventoryStockHandler) GetStocks(c *fiber.Ctx)error{
+	stock, err := h.ish.GetAllStocks()
+	if err != nil {
+		return  c.Status(http.StatusBadGateway).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(fiber.Map{
+		"message": "list of stocks",
+		"status": http.StatusOK,
+		"stocks": stock,
+	})
+
+ }
+
+ func (h *InventoryStockHandler) GetStocksByInventoryID(c *fiber.Ctx) error {
+
+		inventoryID, err := strconv.ParseInt(c.Params("id"),10, 64,)
+		if err != nil {
+			return  err
+		}
+
+	stock, err :=h.ish.GetStocksByInventoryID(inventoryID)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message":  "Internal Server Error",
+			})
+		}
+
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"stock": stock,
+			"status" : http.StatusOK,
+		})
+
+ }
+
+ func (h *InventoryStockHandler) GetProductVariantByInventoryID(c *fiber.Ctx) error {
+		inventoryID, err := strconv.ParseInt(c.Params("id"),10, 64,)
+		if err != nil {
+			return  err
+		}
+		productVariant, err := strconv.ParseInt(c.Params("variant"),10, 64,)
+		if err != nil {
+			return  err
+		}
+
+	stock, err := h.ish.GetProductVariantByInventoryID(inventoryID, productVariant)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message":  err.Error(),
+			})
+		}
+
+		return c.Status(http.StatusOK).JSON(fiber.Map{
+			"stock": stock,
+			"status" : http.StatusOK,
+		})
+
+ }

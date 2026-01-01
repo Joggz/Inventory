@@ -7,5 +7,8 @@ import (
 
 func InventoryStockRoutes(app *fiber.App, handler *handlers.InventoryStockHandler)  {
 	group := app.Group("/stock")
-	group.Post("/inventory/:id", handler.AddMultiInventoryStock)
+		group.Get("/inventory/:id/variant/:variant", handler.GetProductVariantByInventoryID)
+		group.Get("/inventory/:id/stocks", handler.GetStocksByInventoryID)	
+		group.Post("/inventory/:id", handler.AddMultiInventoryStock)
+		group.Get("/inventory/stocks", handler.GetStocks)
 }

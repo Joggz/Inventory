@@ -26,3 +26,25 @@ func (invs *InventoryStockService) AddMultipleStock( inventoryId int64, items []
 
 	return invs.repo.AddMmultiStock(inventoryId, items)
 }
+
+func (invs *InventoryStockService) GetAllStocks()([]migrations.Stocks, error)  {
+		return invs.repo.GetAllStocks();
+}
+
+func (invs *InventoryStockService)GetStocksByInventoryID(inventoryID int64)([]migrations.Stocks, error)  {
+	if inventoryID <= 0 {
+		return nil, errors.New("invalid inventory")
+	}
+	
+	return invs.repo.GetStocksByInventoryID(inventoryID);
+}
+
+func (invs *InventoryStockService) GetProductVariantByInventoryID(inventoryID int64, productVariant int64)([]migrations.Stocks, error)  {
+	if inventoryID <= 0 {
+		return nil, errors.New("invalid inventory")
+	}
+	if productVariant <= 0 {
+		return nil, errors.New("invalid product variant")
+	}
+	return invs.repo.GetProductVariantByInventoryID(inventoryID, productVariant);
+}

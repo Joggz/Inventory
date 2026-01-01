@@ -62,3 +62,69 @@ func CreateInventoryStockTable(db *sql.DB) error {
 	_, err := db.Exec(stockQuery);
 	return err;
 }
+
+
+// func AddPriceToInventoryStock(db *sql.DB) error  {
+//     query := `
+//     ALTER TABLE inventory_stock
+//     ADD COLUMN price DECIMAL(10, 2) NOT NULL DEFAULT 0.00;
+//     `
+//     _, err := db.Exec(query)
+//     return err
+// }
+
+func AddPriceToInventoryStock(db *sql.DB) error {
+	// Check if column already exists
+	checkQuery := `
+		SELECT COUNT(*)
+		FROM INFORMATION_SCHEMA.COLUMNS
+		WHERE TABLE_SCHEMA = DATABASE()
+		AND TABLE_NAME = 'inventory_stock'
+		AND COLUMN_NAME = 'price'
+	`
+
+	var count int
+	if err := db.QueryRow(checkQuery).Scan(&count); err != nil {
+		return err
+	}
+
+	// Add column only if it doesn't exist
+	if count == 0 {
+		alterQuery := `
+			ALTER TABLE inventory_stock
+			ADD COLUMN price DECIMAL(10,2) NOT NULL DEFAULT 0.00
+		`
+		_, err := db.Exec(alterQuery)
+		return err
+	}
+
+	return nil
+}
+
+func CreatwOrderTable(db *sql.DB) error  {
+	orderQuery := `
+		CREATE TABLE IF NOT EXISTS orders (
+		id BIGINT PRIMARY KEY AUTO_INCREMENT,
+		reference VARCHAR(100) UNIQUE,
+		inventory_id BIGINT,
+		product_variant_id BIGINT,
+		quantity INT,
+		amount BIGINT,
+		email VARCHAR(255),
+		status ENUM('pending','success','failed') DEFAULT 'pending',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+	`
+	_,  err := db.Exec(orderQuery);
+	
+	return err
+}
+
+
+// create table
+// lock row stock on inventory stock
+// create Order
+// initiate paymnent
+// verify payment
+// deduct stock quantuity
+
