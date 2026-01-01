@@ -88,3 +88,13 @@ type Stocks struct {
 	Quantity      int
 	Price float64
 }
+
+type Orders struct {
+	ID            int64 `json:"id"`
+	InvoiceRef    string `json:"invoice_ref"`
+	InventoryID   int64 `json:"inventory_id"`
+	ProductVariantID int64 `json:"product_variant_id"`
+	Quantity      int `json:"quantity"`
+	CreatedAt     time.Time `json:"created_at"`
+	Email         string `json:"email"`
+}

@@ -100,3 +100,31 @@ func AddPriceToInventoryStock(db *sql.DB) error {
 
 	return nil
 }
+
+func CreatwOrderTable(db *sql.DB) error  {
+	orderQuery := `
+		CREATE TABLE IF NOT EXISTS orders (
+		id BIGINT PRIMARY KEY AUTO_INCREMENT,
+		reference VARCHAR(100) UNIQUE,
+		inventory_id BIGINT,
+		product_variant_id BIGINT,
+		quantity INT,
+		amount BIGINT,
+		email VARCHAR(255),
+		status ENUM('pending','success','failed') DEFAULT 'pending',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		);
+	`
+	_,  err := db.Exec(orderQuery);
+	
+	return err
+}
+
+
+// create table
+// lock row stock on inventory stock
+// create Order
+// initiate paymnent
+// verify payment
+// deduct stock quantuity
+

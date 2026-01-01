@@ -4,24 +4,22 @@ import (
 	"database/sql"
 	"errors"
 	"vending-machine/internal/migrations"
-
 )
 
 type InventoryStockRepository struct {
 	db *sql.DB
 }
 
-type AddStockItem struct  {
+type AddStockItem struct {
 	ProductVariantID int64
-	quantity int
+	quantity         int
 }
-
 
 func NewInventoryStockRepository(db *sql.DB) *InventoryStockRepository {
 	return &InventoryStockRepository{db: db}
 }
 
-func (invs *InventoryStockRepository) AddMmultiStock(inventoryId int64, items []migrations.AddStockItem) error  {
+func (invs *InventoryStockRepository) AddMmultiStock(inventoryId int64, items []migrations.AddStockItem) error {
 	if len(items) == 0 {
 		return nil
 	}
@@ -34,13 +32,13 @@ func (invs *InventoryStockRepository) AddMmultiStock(inventoryId int64, items []
 		price = VALUES(price)
 	`
 
-	txs, err := invs.db.Begin();
+	txs, err := invs.db.Begin()
 	if err != nil {
-		txs.Rollback();
+		txs.Rollback()
 		return err
 	}
 
-	statement, err := txs.Prepare(query);
+	statement, err := txs.Prepare(query)
 	if err != nil {
 		txs.Rollback()
 		return err
@@ -51,29 +49,29 @@ func (invs *InventoryStockRepository) AddMmultiStock(inventoryId int64, items []
 	for _, item := range items {
 		println(item.Price)
 		if item.Quantity <= 0 {
-			txs.Rollback();
+			txs.Rollback()
 			return errors.New("quantity can not be equals to zero")
 		}
 		if item.Price == 0 {
-			txs.Rollback();
+			txs.Rollback()
 			return errors.New("price can not be equals to zero")
 		}
 		_, err := statement.Exec(
-			inventoryId, 
+			inventoryId,
 			item.ProductVariantID,
 			item.Quantity,
 			item.Price,
 		)
 		if err != nil {
 			txs.Rollback()
-			return err;
+			return err
 		}
 
 	}
-		return txs.Commit()
+	return txs.Commit()
 }
 
-func (invs *InventoryStockRepository) GetAllStocks()([]migrations.Stocks, error)  {
+func (invs *InventoryStockRepository) GetAllStocks() ([]migrations.Stocks, error) {
 	query := `
 		SELECT
 		i.id,
@@ -91,15 +89,13 @@ func (invs *InventoryStockRepository) GetAllStocks()([]migrations.Stocks, error)
 	ORDER BY i.id, p.id, pv.id
 	`
 
-	rows, err := invs.db.Query(query);
+	rows, err := invs.db.Query(query)
 	if err != nil {
 		return nil, err
-	};
+	}
 	var stock []migrations.Stocks
 
-	
-
-	for  rows.Next() {
+	for rows.Next() {
 		var s migrations.Stocks
 		err := rows.Scan(
 			&s.InventoryID,
@@ -121,7 +117,7 @@ func (invs *InventoryStockRepository) GetAllStocks()([]migrations.Stocks, error)
 	return stock, nil
 }
 
-func (invs *InventoryStockRepository) GetStocksByInventoryID(inventoryID int64)([]migrations.Stocks, error)  {
+func (invs *InventoryStockRepository) GetStocksByInventoryID(inventoryID int64) ([]migrations.Stocks, error) {
 	query := `
 	SELECT
 		i.id,
@@ -140,15 +136,13 @@ func (invs *InventoryStockRepository) GetStocksByInventoryID(inventoryID int64)(
 	ORDER BY p.id, pv.id
 	`
 
-	rows, err := invs.db.Query(query, inventoryID);
+	rows, err := invs.db.Query(query, inventoryID)
 	if err != nil {
 		return nil, err
-	};
+	}
 	var stock []migrations.Stocks
 
-	
-
-	for  rows.Next() {
+	for rows.Next() {
 		var s migrations.Stocks
 		err := rows.Scan(
 			&s.InventoryID,
@@ -169,8 +163,7 @@ func (invs *InventoryStockRepository) GetStocksByInventoryID(inventoryID int64)(
 	return stock, nil
 }
 
-
-func (invs *InventoryStockRepository) GetProductVariantByInventoryID(inventoryID int64, productVariant int64)([]migrations.Stocks, error)  {
+func (invs *InventoryStockRepository) GetProductVariantByInventoryID(inventoryID int64, productVariant int64) ([]migrations.Stocks, error) {
 	query := `
 	SELECT
 		i.id AS inventory_id,
@@ -190,15 +183,13 @@ func (invs *InventoryStockRepository) GetProductVariantByInventoryID(inventoryID
 	ORDER BY p.id, pv.id
 	`
 
-	rows, err := invs.db.Query(query, inventoryID, productVariant);
+	rows, err := invs.db.Query(query, inventoryID, productVariant)
 	if err != nil {
 		return nil, err
-	};
+	}
 	var stock []migrations.Stocks
 
-	
-
-	for  rows.Next() {
+	for rows.Next() {
 		var s migrations.Stocks
 		err := rows.Scan(
 			&s.InventoryID,
@@ -218,4 +209,29 @@ func (invs *InventoryStockRepository) GetProductVariantByInventoryID(inventoryID
 		stock = append(stock, s)
 	}
 	return stock, nil
+}
+
+func (invs *InventoryStockRepository) LockStock(tx *sql.Tx, inventory_id int64, variant_id int64) (quantity int64, price float64, err error) {
+	err = tx.QueryRow(`
+        SELECT quantity, price
+        FROM inventory_stock
+        WHERE inventory_id = ? AND product_variant_id = ?
+        FOR UPDATE
+    `, inventory_id, variant_id).Scan(&quantity, &price)
+
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return quantity, price, nil
+}
+
+func (invs *InventoryStockRepository) DeductStockUponSuccessfulPurchase(tx *sql.Tx, inventory_id int64, quantity int64, variant_id int64) error {
+	_, err := tx.Exec(`
+        UPDATE inventory_stock
+        SET quantity = quantity - ?
+        WHERE inventory_id = ? AND product_variant_id = ?
+    `, quantity, inventory_id, variant_id)
+
+	return err
 }

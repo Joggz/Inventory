@@ -64,6 +64,12 @@ func ConnectDB() (*sql.DB, error) {
 		_ = db.Close();
 		return nil, fmt.Errorf("error adding price to inventory stock table: %w", err)
 	}
+
+	if err := migrations.CreatwOrderTable(db); err !=nil {
+		_ = db.Close();
+				return nil, fmt.Errorf("error creating order table: %w", err)
+
+	}
 	fmt.Println("✅ MySQL connected successfully")
 	return db, nil
 }
